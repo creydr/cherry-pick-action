@@ -33,9 +33,8 @@ jobs:
       )
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: creydr/cherry-pick-action@v1
+      - name: Cherry-pick pull request
+        uses: creydr/cherry-pick-action@v1
 ```
 
 Then, on any merged pull request, add a comment:
