@@ -1,5 +1,9 @@
 # Cherry-Pick Action
 
+[![CI](https://github.com/creydr/cherry-pick-action/actions/workflows/ci.yml/badge.svg)](https://github.com/creydr/cherry-pick-action/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/creydr/cherry-pick-action)](https://github.com/creydr/cherry-pick-action/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Cherry-pick pull requests to other branches by commenting `/cherry-pick <target-branch>`.
 
 ## Usage
