@@ -36,8 +36,6 @@ jobs:
         with:
           fetch-depth: 0
       - uses: creydr/cherry-pick-action@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 Then, on any merged pull request, add a comment:
