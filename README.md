@@ -159,6 +159,79 @@ The following placeholders can be used in `pull_title`, `pull_description`, and 
 | `was_successful_by_target` | Per-target results in the format `target=true\|false`, one per line. |
 | `created_pull_numbers` | Space-separated list of created PR numbers. |
 
+## Triggering CI on cherry-pick PRs
+
+By default, pull requests created by `GITHUB_TOKEN` do not trigger further workflow runs. This means CI checks won't run automatically on cherry-pick PRs. There are two ways to solve this:
+
+### Option 1: Use a GitHub App token
+
+Create a [GitHub App](https://docs.github.com/en/apps/creating-github-apps) and use [actions/create-github-app-token](https://github.com/actions/create-github-app-token) to generate a token. This is the recommended approach for organizations since the token is scoped, short-lived, and not tied to a personal account:
+
+```yaml
+permissions:
+  contents: write
+  pull-requests: write
+
+...
+
+steps:
+  - uses: actions/create-github-app-token@v2
+    id: app-token
+    with:
+      app-id: ${{ vars.APP_ID }}
+      private-key: ${{ secrets.APP_PRIVATE_KEY }}
+  - uses: actions/checkout@v4
+  - name: Cherry-pick pull request
+    uses: creydr/cherry-pick-action@v1
+    with:
+      github_token: ${{ steps.app-token.outputs.token }}
+```
+
+The GitHub App needs **Contents** (read/write) and **Pull requests** (read/write) permissions.
+
+### Option 2: Use a Personal Access Token (PAT)
+
+Pass a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) as `github_token`. PRs created with a PAT trigger CI normally:
+
+```yaml
+permissions:
+  contents: write
+  pull-requests: write
+
+...
+
+steps:
+  - uses: actions/checkout@v4
+  - name: Cherry-pick pull request
+    uses: creydr/cherry-pick-action@v1
+    with:
+      github_token: ${{ secrets.PAT }}
+```
+
+The PAT needs **Contents** (read/write) and **Pull requests** (read/write) permissions on the repository.
+
+### Option 3: Close and reopen the PR
+
+As a fallback without additional tokens, close and reopen the created PRs to trigger CI:
+
+```yaml
+steps:
+  - uses: actions/checkout@v4
+  - name: Cherry-pick pull request
+    id: cherry-pick
+    uses: creydr/cherry-pick-action@v1
+  - name: Reopen PRs to trigger CI
+    if: steps.cherry-pick.outputs.created_pull_numbers != ''
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PULL_NUMBERS: ${{ steps.cherry-pick.outputs.created_pull_numbers }}
+    run: |
+      for pr in $PULL_NUMBERS; do
+        gh pr close "$pr" --repo "$GITHUB_REPOSITORY"
+        gh pr reopen "$pr" --repo "$GITHUB_REPOSITORY"
+      done
+```
+
 ## Conflict resolution
 
 By default, the action fails when a cherry-pick encounters a conflict. To instead create a draft PR with the conflict committed, set:
