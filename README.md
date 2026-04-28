@@ -1,6 +1,6 @@
 # Cherry-Pick Action
 
-GitHub Action to cherry-pick commits from merged pull requests to target branches via comments.
+Cherry-pick pull requests to other branches by commenting `/cherry-pick <target-branch>`.
 
 ## Usage
 
