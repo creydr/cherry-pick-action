@@ -17,9 +17,9 @@ describe("replacePlaceholders", () => {
   });
 
   it("replaces pull_title", () => {
-    expect(replacePlaceholders("[${target_branch}] ${pull_title}", main, "main")).toBe(
-      "[main] Fix bug",
-    );
+    expect(
+      replacePlaceholders("[${target_branch}] ${pull_title}", main, "main"),
+    ).toBe("[main] Fix bug");
   });
 
   it("replaces pull_author", () => {
@@ -42,9 +42,9 @@ describe("replacePlaceholders", () => {
 
   it("handles null body", () => {
     const prWithNullBody = { ...main, body: null };
-    expect(replacePlaceholders("${pull_description}", prWithNullBody, "main")).toBe(
-      "",
-    );
+    expect(
+      replacePlaceholders("${pull_description}", prWithNullBody, "main"),
+    ).toBe("");
   });
 });
 
@@ -55,9 +55,7 @@ describe("getMentionedIssueRefs", () => {
 
   it("finds GitHub issue URLs", () => {
     expect(
-      getMentionedIssueRefs(
-        "Fixes https://github.com/owner/repo/issues/123 ",
-      ),
+      getMentionedIssueRefs("Fixes https://github.com/owner/repo/issues/123 "),
     ).toEqual(["owner/repo#123"]);
   });
 

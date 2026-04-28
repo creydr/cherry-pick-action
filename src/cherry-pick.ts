@@ -74,8 +74,7 @@ export class CherryPick {
       const payload = this.github.getPayload();
 
       const owner = this.github.getRepo().owner;
-      const repo =
-        payload.repository?.name ?? this.github.getRepo().repo;
+      const repo = payload.repository?.name ?? this.github.getRepo().repo;
 
       if (repo === undefined) throw new Error("No repository defined!");
 

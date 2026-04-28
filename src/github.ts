@@ -264,10 +264,7 @@ export class Github implements GithubApi {
     });
   }
 
-  private async isShaAssociatedWithPullRequest(
-    sha: string,
-    pull: PullRequest,
-  ) {
+  private async isShaAssociatedWithPullRequest(sha: string, pull: PullRequest) {
     const assoc_pr = await this.getPullRequestsAssociatedWithCommit(sha);
     return assoc_pr.data.some(
       (pr: { number: number }) => pr.number === pull.number,

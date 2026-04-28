@@ -203,10 +203,7 @@ describe("CherryPick.run() orchestration", () => {
   describe("fetch", () => {
     it("target branch fetch fails with GitRefNotFoundError: posts failure comment, continues", async () => {
       const github = new FakeGithub({
-        prComments: [
-          "/cherry-pick nonexistent",
-          "/cherry-pick main",
-        ],
+        prComments: ["/cherry-pick nonexistent", "/cherry-pick main"],
       });
       const git = createMockGit({
         fetch: vi.fn().mockImplementation(async (ref: string) => {
@@ -605,10 +602,7 @@ describe("CherryPick.run() orchestration", () => {
       const github = new FakeGithub({
         commentBody: "/cherry-pick main",
         sourcePr: {
-          labels: [
-            { name: "bug" },
-            { name: "enhancement" },
-          ],
+          labels: [{ name: "bug" }, { name: "enhancement" }],
         },
       });
       const git = createMockGit();
@@ -729,7 +723,10 @@ describe("CherryPick.run() orchestration", () => {
       const github = new FakeGithub({
         commentBody: "/cherry-pick main",
       });
-      github.failOn("enableAutoMerge", requestError(422, "auto-merge is not allowed"));
+      github.failOn(
+        "enableAutoMerge",
+        requestError(422, "auto-merge is not allowed"),
+      );
       const git = createMockGit();
       const config = makeConfig({ auto_merge_enabled: true });
       const cherryPick = new CherryPick(github, config, git);

@@ -98,10 +98,7 @@ async function run(): Promise<void> {
   let parsedSourcePrNumber: number | undefined;
   if (source_pr_number !== "") {
     parsedSourcePrNumber = Number(source_pr_number);
-    if (
-      !Number.isInteger(parsedSourcePrNumber) ||
-      parsedSourcePrNumber <= 0
-    ) {
+    if (!Number.isInteger(parsedSourcePrNumber) || parsedSourcePrNumber <= 0) {
       const message = `Expected input 'source_pr_number' to be a positive integer, but was '${source_pr_number}'`;
       console.error(message);
       core.setFailed(message);
@@ -174,7 +171,8 @@ async function run(): Promise<void> {
       conflict_resolution:
         (experimental.conflict_resolution as
           | "fail"
-          | "draft_commit_conflicts") ?? experimentalDefaults.conflict_resolution,
+          | "draft_commit_conflicts") ??
+        experimentalDefaults.conflict_resolution,
     },
     source_pr_number: parsedSourcePrNumber,
   };
