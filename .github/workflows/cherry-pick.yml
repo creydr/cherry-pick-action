@@ -21,6 +21,6 @@ jobs:
         contains(github.event.comment.body, '/cherry-pick')
       )
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Cherry-pick pull request
         uses: ./
