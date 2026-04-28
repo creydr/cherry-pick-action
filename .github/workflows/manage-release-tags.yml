@@ -31,8 +31,8 @@ jobs:
         if: github.event_name == 'create' && github.event.ref_type == 'branch'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_NAME: ${{ github.event.ref }}
         run: |
-          BRANCH_NAME="${{ github.event.ref }}"
 
           if [[ ! "$BRANCH_NAME" =~ ^release-[0-9]+\.[0-9]+$ ]]; then
             echo "Not a release branch, skipping"

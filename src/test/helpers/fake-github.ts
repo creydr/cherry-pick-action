@@ -51,7 +51,7 @@ export interface FakeSourcePr {
   head?: { ref: string; sha: string };
   base?: { sha: string };
   commitShas?: string[];
-  mergeCommitSha?: string;
+  mergeCommitSha?: string | null;
 }
 
 export interface FakeGithubOptions {
@@ -96,7 +96,7 @@ export class FakeGithub implements GithubApi {
       ...prFields
     } = options?.sourcePr ?? {};
     const commitShas = shas ?? ["abc123"];
-    const mergeCommitSha = mcs ?? "abc123";
+    const mergeCommitSha = mcs === undefined ? "abc123" : mcs;
     this._sourcePr = makePullRequest({
       ...prFields,
       commits: commitShas.length,

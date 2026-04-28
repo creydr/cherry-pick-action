@@ -97,8 +97,11 @@ async function run(): Promise<void> {
 
   let parsedSourcePrNumber: number | undefined;
   if (source_pr_number !== "") {
-    parsedSourcePrNumber = parseInt(source_pr_number, 10);
-    if (isNaN(parsedSourcePrNumber) || parsedSourcePrNumber <= 0) {
+    parsedSourcePrNumber = Number(source_pr_number);
+    if (
+      !Number.isInteger(parsedSourcePrNumber) ||
+      parsedSourcePrNumber <= 0
+    ) {
       const message = `Expected input 'source_pr_number' to be a positive integer, but was '${source_pr_number}'`;
       console.error(message);
       core.setFailed(message);
@@ -167,7 +170,12 @@ async function run(): Promise<void> {
             .filter(Boolean),
     auto_merge_enabled: auto_merge_enabled === "true",
     auto_merge_method: auto_merge_method as "merge" | "squash" | "rebase",
-    experimental: { ...experimentalDefaults, ...experimental },
+    experimental: {
+      conflict_resolution:
+        (experimental.conflict_resolution as
+          | "fail"
+          | "draft_commit_conflicts") ?? experimentalDefaults.conflict_resolution,
+    },
     source_pr_number: parsedSourcePrNumber,
   };
   const cherryPick = new CherryPick(github, config, git);
