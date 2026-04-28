@@ -1,4 +1,4 @@
-name: Cherry-pick pull requests
+name: Cherry Pick Action
 description: >
   Action to cherry-pick commits from merged pull requests to target branches via comments
 inputs:
