@@ -151,7 +151,7 @@ inputs:
       These are indicated by a dollar sign and curly braces (`${placeholder}`).
       Please refer to this action's README for all available placeholders.
     default: >-
-      [Cherry-pick ${target_branch}] ${pull_title}
+      [${target_branch}] ${pull_title}
   source_pr_number:
     description: >
       Specifies the pull request (by its number) to cherry-pick, i.e. the source pull request.

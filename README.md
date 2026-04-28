@@ -83,7 +83,7 @@ Or use multiple commands in one comment:
 
 | Input | Description | Default |
 | --- | --- | --- |
-| `pull_title` | Template for the cherry-pick PR title. | `[Cherry-pick ${target_branch}] ${pull_title}` |
+| `pull_title` | Template for the cherry-pick PR title. | `[${target_branch}] ${pull_title}` |
 | `pull_description` | Template for the cherry-pick PR body. | `# Description\nCherry-pick of #${pull_number} to \`${target_branch}\`.` |
 | `branch_name` | Template for the cherry-pick branch name. | `cherry-pick-${pull_number}-to-${target_branch}` |
 
