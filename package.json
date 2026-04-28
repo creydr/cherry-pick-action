@@ -1,0 +1,45 @@
+{
+  "name": "cherry-pick-action",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GitHub action to cherry-pick merged pull requests to target branches via comments",
+  "type": "module",
+  "main": "lib/main.js",
+  "scripts": {
+    "build": "tsc",
+    "format": "prettier --write \"**.ts\"",
+    "format-check": "prettier --check \"**.ts\"",
+    "package": "node esbuild.config.mjs",
+    "test": "vitest run --silent=true",
+    "test-verbose": "vitest run --reporter=verbose --silent=true",
+    "all": "npm run format && npm run build && npm run package && npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/creydr/cherry-pick-action.git"
+  },
+  "keywords": [
+    "actions",
+    "cherry-pick",
+    "backport"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "dependencies": {
+    "@actions/core": "3.0.1",
+    "@actions/exec": "3.0.0",
+    "@actions/github": "9.1.1",
+    "dedent": "1.7.2"
+  },
+  "devDependencies": {
+    "@octokit/request-error": "7.1.0",
+    "@types/dedent": "0.7.2",
+    "@types/node": "25.6.0",
+    "esbuild": "0.28.0",
+    "prettier": "3.8.3",
+    "typescript": "6.0.3",
+    "vitest": "4.1.5"
+  }
+}

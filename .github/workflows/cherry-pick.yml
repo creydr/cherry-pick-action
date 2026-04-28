@@ -1,0 +1,28 @@
+name: Cherry-pick merged pull request
+on:
+  pull_request_target:
+    types: [closed]
+  issue_comment:
+    types: [created]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  cherry-pick:
+    name: Cherry-pick pull request
+    runs-on: ubuntu-latest
+    if: >
+      (
+        github.event_name == 'pull_request_target' &&
+        github.event.pull_request.merged
+      ) || (
+        github.event_name == 'issue_comment' &&
+        github.event.issue.pull_request &&
+        contains(github.event.comment.body, '/cherry-pick')
+      )
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Cherry-pick pull request
+        uses: ./

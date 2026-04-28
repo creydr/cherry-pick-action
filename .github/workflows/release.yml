@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g., v1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.tag }}
+
+      - name: Parse version from tag
+        id: version
+        run: |
+          TAG="${{ inputs.tag }}"
+          TAG=${TAG#v}
+          echo "full=$TAG" >> $GITHUB_OUTPUT
+          echo "major=$(echo "$TAG" | cut -d. -f1)" >> $GITHUB_OUTPUT
+          echo "minor=$(echo "$TAG" | cut -d. -f2)" >> $GITHUB_OUTPUT
+
+      - name: Create and move major/minor tags
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag v${{ steps.version.outputs.major }} --force
+          git tag v${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }} --force
+          git push origin v${{ steps.version.outputs.major }} --force
+          git push origin v${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }} --force
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${{ steps.version.outputs.full }}" \
+            --generate-notes
