@@ -75,6 +75,14 @@ async function run(): Promise<void> {
     return;
   }
 
+  if (copy_all_reviewers === "true" && copy_requested_reviewers === "true") {
+    const message =
+      "Expected only one of 'copy_all_reviewers' and 'copy_requested_reviewers' to be enabled, but both were";
+    console.error(message);
+    core.setFailed(message);
+    return;
+  }
+
   for (const key in experimental) {
     if (!(key in experimentalDefaults)) {
       console.warn(
