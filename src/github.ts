@@ -103,7 +103,7 @@ export class Github implements GithubApi {
         ...this.getRepo(),
         pull_number,
       })
-      .then((response: { data: PullRequest }) => response.data as PullRequest);
+      .then((response: { data: PullRequest }) => response.data);
   }
 
   public async isMerged(pull: PullRequest) {
