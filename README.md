@@ -210,28 +210,6 @@ steps:
 
 The PAT needs **Contents** (read/write) and **Pull requests** (read/write) permissions on the repository.
 
-### Option 3: Close and reopen the PR
-
-As a fallback without additional tokens, close and reopen the created PRs to trigger CI:
-
-```yaml
-steps:
-  - uses: actions/checkout@v4
-  - name: Cherry-pick pull request
-    id: cherry-pick
-    uses: creydr/cherry-pick-action@v1
-  - name: Reopen PRs to trigger CI
-    if: steps.cherry-pick.outputs.created_pull_numbers != ''
-    env:
-      GH_TOKEN: ${{ github.token }}
-      PULL_NUMBERS: ${{ steps.cherry-pick.outputs.created_pull_numbers }}
-    run: |
-      for pr in $PULL_NUMBERS; do
-        gh pr close "$pr" --repo "$GITHUB_REPOSITORY"
-        gh pr reopen "$pr" --repo "$GITHUB_REPOSITORY"
-      done
-```
-
 ## Conflict resolution
 
 By default, the action fails when a cherry-pick encounters a conflict. To instead create a draft PR with the conflict committed, set:
