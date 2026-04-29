@@ -23,17 +23,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Cherry-pick pull request
-        id: cherry-pick
         uses: ./
         with:
           merge_commits: skip
-      - name: Reopen PRs to trigger CI
-        if: steps.cherry-pick.outputs.created_pull_numbers != ''
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PULL_NUMBERS: ${{ steps.cherry-pick.outputs.created_pull_numbers }}
-        run: |
-          for pr in $PULL_NUMBERS; do
-            gh pr close "$pr" --repo "$GITHUB_REPOSITORY"
-            gh pr reopen "$pr" --repo "$GITHUB_REPOSITORY"
-          done
