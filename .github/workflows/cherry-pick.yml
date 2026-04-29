@@ -32,3 +32,5 @@ jobs:
         with:
           github_token: ${{ steps.app-token.outputs.token }}
           merge_commits: skip
+          auto_merge_method: squash
+          auto_merge_enabled: true
