@@ -12,10 +12,11 @@ import { MergeStrategy, RequestError } from "../../github.js";
 export function requestError(
   status: number,
   message: string = "API Error",
+  data: unknown = {},
 ): RequestError {
   return new RequestError(message, status, {
     request: { method: "POST", url: "", headers: {} },
-    response: { url: "", status, headers: {}, data: {} },
+    response: { url: "", status, headers: {}, data },
   });
 }
 

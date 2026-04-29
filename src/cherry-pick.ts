@@ -76,8 +76,6 @@ export class CherryPick {
       const owner = this.github.getRepo().owner;
       const repo = payload.repository?.name ?? this.github.getRepo().repo;
 
-      if (repo === undefined) throw new Error("No repository defined!");
-
       const pull_number =
         this.config.source_pr_number === undefined
           ? this.github.getPullNumber()
@@ -107,7 +105,7 @@ export class CherryPick {
       }
 
       console.log(
-        `Fetching all the commits from the pull request: ${mainpr.commits + 1}`,
+        `Fetching commits from the pull request (depth: ${mainpr.commits + 1})`,
       );
       await this.git.fetch(
         `refs/pull/${pull_number}/head`,
@@ -270,10 +268,10 @@ export class CherryPick {
             continue;
           }
 
-          let uncommitedShas: string[] | null;
+          let uncommittedShas: string[] | null;
 
           try {
-            uncommitedShas = await this.git.cherryPick(
+            uncommittedShas = await this.git.cherryPick(
               commitShasToCherryPick,
               this.config.experimental.conflict_resolution,
               this.config.pwd,
@@ -339,7 +337,7 @@ export class CherryPick {
               head: branchname,
               base: target,
               maintainer_can_modify: true,
-              draft: uncommitedShas !== null,
+              draft: uncommittedShas !== null,
             });
           } catch (error) {
             if (!(error instanceof RequestError)) throw error;
@@ -368,7 +366,7 @@ export class CherryPick {
           }
           const new_pr = new_pr_response.data;
 
-          if (this.config.copy_milestone == true) {
+          if (this.config.copy_milestone === true) {
             const milestone = mainpr.milestone?.number;
             if (milestone) {
               console.info("Setting milestone to " + milestone);
@@ -381,9 +379,9 @@ export class CherryPick {
             }
           }
 
-          if (this.config.copy_assignees == true) {
+          if (this.config.copy_assignees === true) {
             const assignees =
-              mainpr.assignees?.map((label) => label.login) ?? [];
+              mainpr.assignees?.map((assignee) => assignee.login) ?? [];
             if (assignees.length > 0) {
               console.info("Setting assignees " + assignees);
               try {
@@ -577,33 +575,32 @@ export class CherryPick {
             }
           }
 
-          {
-            const message =
-              uncommitedShas !== null
-                ? this.composeMessageForSuccessWithConflicts(
-                    new_pr.number,
-                    target,
-                    branchname,
-                    uncommitedShas,
-                    this.config.experimental.conflict_resolution,
-                  )
-                : this.composeMessageForSuccess(new_pr.number, target);
+          const successMessage =
+            uncommittedShas !== null
+              ? this.composeMessageForSuccessWithConflicts(
+                  new_pr.number,
+                  target,
+                  branchname,
+                  uncommittedShas,
+                  this.config.experimental.conflict_resolution,
+                )
+              : this.composeMessageForSuccess(new_pr.number, target);
 
-            successByTarget.set(target, true);
-            createdPullRequestNumbers.push(new_pr.number);
-            await this.github.createComment({
-              owner,
-              repo,
-              issue_number: pull_number,
-              body: message,
-            });
-          }
-          if (uncommitedShas !== null) {
-            const message: string =
+          successByTarget.set(target, true);
+          createdPullRequestNumbers.push(new_pr.number);
+          await this.github.createComment({
+            owner,
+            repo,
+            issue_number: pull_number,
+            body: successMessage,
+          });
+
+          if (uncommittedShas !== null) {
+            const conflictMessage: string =
               this.composeMessageToResolveCommittedConflicts(
                 target,
                 branchname,
-                uncommitedShas,
+                uncommittedShas,
                 this.config.experimental.conflict_resolution,
               );
 
@@ -611,7 +608,7 @@ export class CherryPick {
               owner,
               repo,
               issue_number: new_pr.number,
-              body: message,
+              body: conflictMessage,
             });
           }
         } catch (error) {

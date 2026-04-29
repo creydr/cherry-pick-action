@@ -736,6 +736,114 @@ describe("CherryPick.run() orchestration", () => {
       expect(github.autoMergeByPR.size).toBe(0);
       expect(core.setOutput).toHaveBeenCalledWith("was_successful", true);
     });
+
+    it("auto-merge not allowed: warns about repository settings", async () => {
+      const warnSpy = vi.spyOn(console, "warn");
+      const github = new FakeGithub({
+        commentBody: "/cherry-pick main",
+      });
+      github.failOn(
+        "enableAutoMerge",
+        requestError(422, "API Error", {
+          message: "auto-merge is not allowed",
+        }),
+      );
+      const git = createMockGit();
+      const config = makeConfig({ auto_merge_enabled: true });
+      const cherryPick = new CherryPick(github, config, git);
+      await cherryPick.run();
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Allow auto-merge"),
+      );
+      warnSpy.mockRestore();
+    });
+
+    it("merge commits not allowed: suggests squash or rebase", async () => {
+      const warnSpy = vi.spyOn(console, "warn");
+      const github = new FakeGithub({
+        commentBody: "/cherry-pick main",
+      });
+      github.failOn(
+        "enableAutoMerge",
+        requestError(422, "API Error", {
+          message: "merge commits are not allowed",
+        }),
+      );
+      const git = createMockGit();
+      const config = makeConfig({ auto_merge_enabled: true });
+      const cherryPick = new CherryPick(github, config, git);
+      await cherryPick.run();
+
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("squash"));
+      warnSpy.mockRestore();
+    });
+
+    it("insufficient permissions: warns about token permissions", async () => {
+      const warnSpy = vi.spyOn(console, "warn");
+      const github = new FakeGithub({
+        commentBody: "/cherry-pick main",
+      });
+      github.failOn(
+        "enableAutoMerge",
+        requestError(403, "API Error", {
+          message: "not authorized to enable auto-merge",
+        }),
+      );
+      const git = createMockGit();
+      const config = makeConfig({ auto_merge_enabled: true });
+      const cherryPick = new CherryPick(github, config, git);
+      await cherryPick.run();
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("permissions"),
+      );
+      warnSpy.mockRestore();
+    });
+
+    it("clean status: warns that auto-merge is not needed", async () => {
+      const warnSpy = vi.spyOn(console, "warn");
+      const github = new FakeGithub({
+        commentBody: "/cherry-pick main",
+      });
+      github.failOn(
+        "enableAutoMerge",
+        requestError(422, "API Error", {
+          message: "Pull request is in clean status",
+        }),
+      );
+      const git = createMockGit();
+      const config = makeConfig({ auto_merge_enabled: true });
+      const cherryPick = new CherryPick(github, config, git);
+      await cherryPick.run();
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("merged immediately"),
+      );
+      warnSpy.mockRestore();
+    });
+
+    it("protected branch: warns about branch protection", async () => {
+      const warnSpy = vi.spyOn(console, "warn");
+      const github = new FakeGithub({
+        commentBody: "/cherry-pick main",
+      });
+      github.failOn(
+        "enableAutoMerge",
+        requestError(422, "API Error", {
+          message: "protected branch rules prevent this",
+        }),
+      );
+      const git = createMockGit();
+      const config = makeConfig({ auto_merge_enabled: true });
+      const cherryPick = new CherryPick(github, config, git);
+      await cherryPick.run();
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Branch protection"),
+      );
+      warnSpy.mockRestore();
+    });
   });
 
   describe("outputs", () => {
