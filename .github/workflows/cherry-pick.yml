@@ -21,7 +21,7 @@ jobs:
         contains(github.event.comment.body, '/cherry-pick')
       )
     steps:
-      - uses: actions/create-github-app-token@v2
+      - uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: ${{ vars.CHERRY_PICKER_APP_ID }}
