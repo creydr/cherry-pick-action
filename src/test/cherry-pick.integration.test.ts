@@ -146,7 +146,7 @@ describe("CherryPick.run() orchestration", () => {
       expect(github.createdPRs).toHaveLength(0);
       expect(github.comments).toContainEqual(
         expect.objectContaining({
-          body: expect.stringContaining("Only merged pull requests"),
+          body: expect.stringContaining("has not been merged yet"),
         }),
       );
     });

@@ -83,13 +83,17 @@ export class CherryPick {
       const mainpr = await this.github.getPullRequest(pull_number);
 
       if (!(await this.github.isMerged(mainpr))) {
-        const message = "Only merged pull requests can be cherry-picked.";
-        await this.github.createComment({
-          owner,
-          repo,
-          issue_number: pull_number,
-          body: message,
-        });
+        const commentBody = this.github.getCommentBody();
+        if (commentBody !== undefined) {
+          const message =
+            "This pull request has not been merged yet. The cherry-pick will be performed automatically when this pull request is merged.";
+          await this.github.createComment({
+            owner,
+            repo,
+            issue_number: pull_number,
+            body: message,
+          });
+        }
         return;
       }
 
