@@ -1,0 +1,92 @@
+name: Update Dependabot Config
+
+on:
+  create:
+  delete:
+  workflow_dispatch:
+
+jobs:
+  update-dependabot:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: update-dependabot
+      cancel-in-progress: true
+    if: github.event_name == 'workflow_dispatch' || (github.event.ref_type == 'branch' && startsWith(github.event.ref, 'release-'))
+    steps:
+      - name: Create GitHub App token
+        uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          app-id: ${{ vars.CHERRY_PICKER_APP_ID }}
+          private-key: ${{ secrets.CHERRY_PICKER_APP_PRIVATE_KEY }}
+
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: 'package.json'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Get release branches
+        id: branches
+        run: |
+          BRANCHES=$(git branch -r | grep -o 'origin/release-[^ ]*' | sed 's|origin/||' | sort -V | tr '\n' ' ')
+          echo "list=$BRANCHES" >> "$GITHUB_OUTPUT"
+
+      - name: Update dependabot config
+        env:
+          BRANCHES: ${{ steps.branches.outputs.list }}
+        run: npx tsx hack/update-dependabot.ts $BRANCHES
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet .github/dependabot.yml; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Get GitHub App User ID
+        if: steps.changes.outputs.changed == 'true'
+        id: get-user-id
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update PR
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          BRANCH_NAME="chore/update-dependabot-config"
+
+          git config user.name "${{ steps.app-token.outputs.app-slug }}[bot]"
+          git config user.email "${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
+
+          git checkout -B "$BRANCH_NAME"
+          git add .github/dependabot.yml
+          git commit -m "chore: update dependabot config for release branches"
+          git push -u origin "$BRANCH_NAME" --force
+
+          EXISTING_PR=$(gh pr list --head "$BRANCH_NAME" --json number --jq '.[0].number' 2>/dev/null || true)
+          if [ -n "$EXISTING_PR" ]; then
+            echo "PR #$EXISTING_PR already exists and has been updated"
+          else
+            gh pr create \
+              --title "chore: update dependabot config for release branches" \
+              --body "## Summary
+          - Auto-generated update to dependabot.yml to reflect current release branches
+          - Adds grouped dependency update entries for each release branch
+
+          This PR was created automatically by the update-dependabot workflow."
+          fi
