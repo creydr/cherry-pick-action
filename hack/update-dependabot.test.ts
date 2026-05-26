@@ -25,15 +25,15 @@ describe("generateDependabotYaml", () => {
 
   it("adds entries for a release branch", () => {
     const result = generateDependabotYaml(["release-1.0"]);
-    expect(result).toContain("target-branch: release-1.0");
+    expect(result).toContain('target-branch: "release-1.0"');
 
-    const parts = result.split("target-branch: release-1.0");
+    const parts = result.split('target-branch: "release-1.0"');
     expect(parts).toHaveLength(3); // before + npm entry + github-actions entry
   });
 
   it("groups both ecosystems on release branches", () => {
     const result = generateDependabotYaml(["release-1.0"]);
-    const releasePart = result.split("target-branch: release-1.0")[1];
+    const releasePart = result.split('target-branch: "release-1.0"')[1];
     expect(releasePart).toContain("npm:\n        patterns:");
   });
 
@@ -48,7 +48,7 @@ describe("generateDependabotYaml", () => {
     expect(result).not.toContain("prefix:");
   });
 
-  it("sorts release branches", () => {
+  it("preserves input order of release branches", () => {
     const result = generateDependabotYaml([
       "release-2.0",
       "release-1.0",
@@ -56,15 +56,15 @@ describe("generateDependabotYaml", () => {
     ]);
 
     const targetBranches = [
-      ...result.matchAll(/target-branch: ([\w.-]+)/g),
+      ...result.matchAll(/target-branch: "([^"]+)"/g),
     ].map((m) => m[1]);
     expect(targetBranches).toEqual([
+      "release-2.0",
+      "release-2.0",
       "release-1.0",
       "release-1.0",
       "release-1.1",
       "release-1.1",
-      "release-2.0",
-      "release-2.0",
     ]);
   });
 

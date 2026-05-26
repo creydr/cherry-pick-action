@@ -8,6 +8,9 @@ on:
 jobs:
   update-dependabot:
     runs-on: ubuntu-latest
+    concurrency:
+      group: update-dependabot
+      cancel-in-progress: true
     if: github.event_name == 'workflow_dispatch' || (github.event.ref_type == 'branch' && startsWith(github.event.ref, 'release-'))
     steps:
       - name: Create GitHub App token
@@ -74,12 +77,9 @@ jobs:
           else
             gh pr create \
               --title "chore: update dependabot config for release branches" \
-              --body "$(cat <<'BODY'
-          ## Summary
+              --body "## Summary
           - Auto-generated update to dependabot.yml to reflect current release branches
           - Adds grouped dependency update entries for each release branch
 
-          This PR was created automatically by the update-dependabot workflow.
-          BODY
-          )"
+          This PR was created automatically by the update-dependabot workflow."
           fi

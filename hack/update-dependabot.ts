@@ -16,7 +16,7 @@ function formatUpdate(update: DependabotUpdate): string {
   lines.push(`  - package-ecosystem: ${update["package-ecosystem"]}`);
   lines.push(`    directory: ${update.directory}`);
   if (update["target-branch"]) {
-    lines.push(`    target-branch: ${update["target-branch"]}`);
+    lines.push(`    target-branch: "${update["target-branch"]}"`);
   }
   lines.push(`    schedule:`);
   lines.push(`      interval: ${update.schedule.interval}`);
@@ -38,8 +38,6 @@ function formatUpdate(update: DependabotUpdate): string {
 }
 
 export function generateDependabotYaml(releaseBranches: string[]): string {
-  const sorted = [...releaseBranches].sort();
-
   const updates: DependabotUpdate[] = [
     {
       "package-ecosystem": "npm",
@@ -54,7 +52,7 @@ export function generateDependabotYaml(releaseBranches: string[]): string {
     },
   ];
 
-  for (const branch of sorted) {
+  for (const branch of releaseBranches) {
     updates.push({
       "package-ecosystem": "npm",
       directory: "/",
