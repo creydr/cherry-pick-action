@@ -12,3 +12,25 @@ updates:
       github-actions:
         patterns:
           - "*"
+  - package-ecosystem: npm
+    directory: /
+    target-branch: "release-1.0"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "[release-1.0]"
+    groups:
+      npm:
+        patterns:
+          - "*"
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: "release-1.0"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "[release-1.0]"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
