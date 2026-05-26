@@ -56,6 +56,13 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Get GitHub App User ID
+        if: steps.changes.outputs.changed == 'true'
+        id: get-user-id
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+
       - name: Create or update PR
         if: steps.changes.outputs.changed == 'true'
         env:
@@ -63,8 +70,8 @@ jobs:
         run: |
           BRANCH_NAME="chore/update-dependabot-config"
 
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "${{ steps.app-token.outputs.app-slug }}[bot]"
+          git config user.email "${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
 
           git checkout -B "$BRANCH_NAME"
           git add .github/dependabot.yml
