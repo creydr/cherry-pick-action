@@ -37,9 +37,9 @@
   "devDependencies": {
     "@octokit/request-error": "7.1.0",
     "@types/dedent": "0.7.2",
-    "@types/node": "26.0.0",
+    "@types/node": "26.0.1",
     "esbuild": "0.28.1",
-    "prettier": "3.8.4",
+    "prettier": "3.9.4",
     "typescript": "6.0.3",
     "vitest": "4.1.9"
   }
