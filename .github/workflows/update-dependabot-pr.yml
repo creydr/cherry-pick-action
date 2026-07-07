@@ -1,11 +1,11 @@
-name: Update dist on Dependabot PRs
+name: Update Dependabot PRs
 
 on:
   pull_request:
     types: [opened, synchronize]
 
 jobs:
-  update-dist:
+  update-dependabot-pr:
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
     steps:
@@ -30,19 +30,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Format source files
+        run: npm run format
+
       - name: Build and package
         run: |
           npm run build
           npm run package
 
-      - name: Check for dist changes
+      - name: Check for changes
         id: diff
         run: |
-          if [ -n "$(git diff --name-only dist/)" ]; then
+          if [ -n "$(git diff --name-only)" ]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Commit updated dist
+      - name: Commit changes
         if: steps.diff.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -51,6 +54,6 @@ jobs:
           USER_ID=$(gh api "/users/${APP_SLUG}[bot]" --jq .id)
           git config user.name "${APP_SLUG}[bot]"
           git config user.email "${USER_ID}+${APP_SLUG}[bot]@users.noreply.github.com"
-          git add dist/
-          git commit -m "chore: update dist"
+          git add .
+          git commit -m "chore: update formatting and dist"
           git push
