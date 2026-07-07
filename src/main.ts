@@ -178,8 +178,7 @@ async function run(): Promise<void> {
     experimental: {
       conflict_resolution:
         (experimental.conflict_resolution as
-          | "fail"
-          | "draft_commit_conflicts") ??
+          "fail" | "draft_commit_conflicts") ??
         experimentalDefaults.conflict_resolution,
     },
     source_pr_number: parsedSourcePrNumber,
